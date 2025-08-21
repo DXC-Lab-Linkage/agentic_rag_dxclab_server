@@ -13,7 +13,7 @@
   - [RAG 用 Vector DB について](#rag-用-vector-db-について)
   - [アプリケーションの起動](#アプリケーションの起動)
   - [Vector DB データの変更方法](#vector-db-データの変更方法)
-    - [Vector DB へのデータの登録：create_index.py](#vector-db-へのデータの登録create_indexpy)
+    - [Vector DB へのデータの登録：create\_index.py](#vector-db-へのデータの登録create_indexpy)
       - [Vector DB に登録した情報の説明を変更](#vector-db-に登録した情報の説明を変更)
 
 ## 概要
@@ -22,6 +22,11 @@
 
 - 社内情報を効果的に活用し、柔軟な思考が可能な Agentic RAG チャットボットです。LangGraph を基盤とした AI Agent が自律的に作業計画やタスクを立案し、Web 検索や Vector DB を用いた RAG により最適な回答を提供します。従来の一問一答にとどまらず、回答後も会話や追加分析が継続できる点が特徴です。RAG は Web 検索のように、Agent が呼び出すツールのひとつとして位置付けられます。
 - Plan & Execution の Agent パターンも導入しており、Agent が自ら検索計画を作成して適切な検索ツールを実行します。それにより、多角的かつ体系的に情報を収集して回答することができます。
+
+> 参考資料
+
+- [What is agentic RAG?](https://www.ibm.com/think/topics/agentic-rag)
+- [The 2025 Guide to AI Agents](https://www.ibm.com/think/ai-agents)
 
 ## 画面イメージ
 
