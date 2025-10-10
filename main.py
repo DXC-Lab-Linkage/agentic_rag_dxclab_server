@@ -86,6 +86,11 @@ app.include_router(get_csrf)
 app.include_router(start_chat)
 app.include_router(ask_agent)
 
+
+WATSONX_GPT_OSS = os.getenv("WATSONX_GPT_OSS")
+if WATSONX_GPT_OSS == "True":
+    print(" LLM: watsonx gpt-oss.")
+
 if os.path.exists("dist"):
     # If you mount dist/, you will get a 404 when accessing the Vue Router path. So you should not mount it.
     app.mount("/assets", StaticFiles(directory="dist/assets", html=True), name="assets")

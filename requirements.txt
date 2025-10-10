@@ -37,3 +37,6 @@ black==25.1.0
 
 # isort
 isort==6.0.1
+
+# LangChain IBM
+langchain-ibm==0.3.18

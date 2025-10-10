@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import time
+import traceback
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Request
@@ -106,6 +107,12 @@ async def exec_graph_stream(request: ChatModel, req: Request):
             input_data, config, stream_mode=["messages", "custom", "updates"]
         ):
             if mode == "messages":
+                if isinstance(chunk, tuple):
+                    pass
+                elif not isinstance(chunk, dict):
+                    pass
+                elif chunk.get("choices") is None:
+                    chunk["choices"] = []
                 message, meta = chunk
                 # Stream messages.
                 langgraph_node = meta.get("langgraph_node")
@@ -121,6 +128,12 @@ async def exec_graph_stream(request: ChatModel, req: Request):
             elif mode == "updates":
                 pass
             elif mode == "custom":
+                if isinstance(chunk, tuple):
+                    pass
+                elif not isinstance(chunk, dict):
+                    pass
+                elif chunk.get("choices") is None:
+                    chunk["choices"] = []
                 custom_event = chunk
                 data = {"type": "custom", "content": custom_event}
                 yield f"{json.dumps(data)}\n\n"
@@ -130,10 +143,19 @@ async def exec_graph_stream(request: ChatModel, req: Request):
         data = {"type": "final_msg", "content": sanitized_answer}
         yield f"{json.dumps(data)}\n\n"
     except Exception as err:
-        print(err)
+        full_traceback = traceback.format_exc()
+        print("=" * 80)
+        print("FULL ERROR TRACEBACK:")
+        print(full_traceback)
+        print("=" * 80)
+        print(f"Error type: {type(err).__name__}")
+        print(f"Error message: {err}")
+
         data = {
             "type": "error",
             "content": "Error: An error occurred while running the Agent.",
+            "detail": str(err),
+            "traceback": full_traceback,
         }
         yield f"{json.dumps(data)}\n\n"
         raise Exception(err)
