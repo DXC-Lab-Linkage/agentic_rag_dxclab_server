@@ -23,6 +23,29 @@ from src.routers.start_chat import router as start_chat
 
 load_dotenv()
 
+# For watsonx gpt-oss
+WATSONX_GPT_OSS = os.getenv("WATSONX_GPT_OSS")
+if WATSONX_GPT_OSS == "True":
+    # --- Safety patch for Watsonx streaming bug (choices=None) ---
+    import langchain_ibm.chat_models as _cm
+
+    # keep original function
+    _orig = _cm._convert_chunk_to_generation_chunk
+
+    # Secure conversion functions
+    def _safe_convert(
+        chunk, default_chunk_class, is_first_tool_chunk, _prompt_tokens_included
+    ):
+        # Absorb cases where Watsonx GPT-OSS returns null choices
+        if chunk.get("choices") is None:
+            chunk = {**chunk, "choices": []}
+        return _orig(
+            chunk, default_chunk_class, is_first_tool_chunk, _prompt_tokens_included
+        )
+
+    # パッチを適用
+    _cm._convert_chunk_to_generation_chunk = _safe_convert
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -107,12 +107,6 @@ async def exec_graph_stream(request: ChatModel, req: Request):
             input_data, config, stream_mode=["messages", "custom", "updates"]
         ):
             if mode == "messages":
-                if isinstance(chunk, tuple):
-                    pass
-                elif not isinstance(chunk, dict):
-                    pass
-                elif chunk.get("choices") is None:
-                    chunk["choices"] = []
                 message, meta = chunk
                 # Stream messages.
                 langgraph_node = meta.get("langgraph_node")
@@ -128,12 +122,6 @@ async def exec_graph_stream(request: ChatModel, req: Request):
             elif mode == "updates":
                 pass
             elif mode == "custom":
-                if isinstance(chunk, tuple):
-                    pass
-                elif not isinstance(chunk, dict):
-                    pass
-                elif chunk.get("choices") is None:
-                    chunk["choices"] = []
                 custom_event = chunk
                 data = {"type": "custom", "content": custom_event}
                 yield f"{json.dumps(data)}\n\n"
