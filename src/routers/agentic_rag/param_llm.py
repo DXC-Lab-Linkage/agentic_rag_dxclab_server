@@ -50,7 +50,8 @@ def get_gpt_model():
             "AZURE_OPENAI_CHATGPT_DEPLOYMENT_NAME"
         )
 
-        if AZURE_OPENAI_CHATGPT_DEPLOYMENT_NAME == "o4-mini":
+        deploy_name = AZURE_OPENAI_CHATGPT_DEPLOYMENT_NAME
+        if deploy_name.startswith("o4-mini") or deploy_name.startswith("gpt-5"):
             model = AzureChatOpenAI(
                 azure_deployment=CHAT_DEPLOYMENT_NAME,
                 azure_endpoint=AZURE_OPENAI_ENDPOINT,
