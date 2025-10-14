@@ -1,3 +1,4 @@
+import json
 import os
 import time
 from typing import Annotated
@@ -86,6 +87,40 @@ class AutoRagAgent:
         plan = plan_arr[index]
         return plan
 
+    def extract_tool_name_from_content(self, response):
+        """
+        Extract tool name from content
+        """
+        try:
+            if hasattr(response, "tool_calls") and response.tool_calls:
+                return msg_util.get_tool_names(response)
+
+            content = response.content
+            if not content:
+                return None
+
+            # Parse as JSON.
+            data = json.loads(content)
+
+            # Extract recipient_name from tool_uses
+            if "tool_uses" in data and data["tool_uses"]:
+                tool_use = data["tool_uses"][0]
+                recipient_name = tool_use.get("recipient_name", "")
+
+                # Extract tool name from functions.[tool_name]
+                if "." in recipient_name:
+                    tool_name = recipient_name.split(".")[-1]
+                else:
+                    tool_name = recipient_name
+
+                return [tool_name] if tool_name else None
+
+        except (json.JSONDecodeError, KeyError, AttributeError) as e:
+            print(f"Error extracting tool name: {e}")
+            return None
+
+        return None
+
     def _select_tool(
         self,
         state: Annotated[State, InjectedState],
@@ -109,6 +144,7 @@ class AutoRagAgent:
         plan_exec = {"plan_exec": plan}
         model = get_gpt_model()
         max_retries = 1
+
         for attempt in range(max_retries + 1):
             try:
                 chain = model.bind_tools(self._tools)
@@ -123,29 +159,34 @@ class AutoRagAgent:
                         f"Select the tool to call(bind): Attempt {attempt + 1} failed, retrying..."
                     )
                     time.sleep(1)  # Adjust the wait time as needed
-        config["tool_choice"] = "required"
-        for attempt in range(max_retries):
-            # Prompt
+
+        for attempt in range(max_retries + 1):
             prompt_template = prompt_mgr.get_prompt("select_tool")
             prompt = prompt_template.format(plan=plan, tool_info=tool_info)
-            response = chain.invoke(prompt, config=config)
+            response = chain.invoke(
+                prompt, config={**config, "tool_choice": "required"}
+            )
+
             tool_name = msg_util.get_tool_names(response)
+
+            if not tool_name:
+                tool_name = self.extract_tool_name_from_content(response)
+
             if tool_name:
-                # If tool_name is not False, exit the loop.
                 break
             else:
                 print(
                     f"Select the tool to call(invoke): Attempt {attempt + 1} failed. Retrying..."
                 )
+                print(f"Response: {response}")
         else:
-            # If tool_name is False after 1 retry
-            print("Warning: Even after one retry, tool_name could not be obtained.")
+            print("Warning: Even after retries, tool_name could not be obtained.")
             tool_name = ["N/A"]
-        # Show logs
+
         msg = agent_msg_mgr.get_msg("select_tool", plan=plan, tool_name=tool_name)
         log.print(msg + "\n")
-        # Streaming custom message
         writer(msg)
+
         return {"messages": [response], "plan_exec": plan_exec}
 
     async def create_graph(self):

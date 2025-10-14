@@ -4,13 +4,20 @@ select_tool: |
   # Instructions
   {plan}
 
-  # Notes
-  - If a specific tool name is clearly stated in the instructions above, invoke that tool.
-  - Do not ask any questions. Also, do not write any messages in the `content`.
-  - If it is unclear which tool to invoke, select an appropriate tool based on the "Available Tools Information" provided below. Carefully review the characteristics of the listed tools and choose accordingly. First, determine whether the task requires a search or another type of operation. If it remains unclear, invoke `ans_llm_base`.
-  - Do not invoke the "search tool" for purposes other than searching.
+  # Important: How to call the tool
+  - Call the tool using the standard function calling format.
+  - Do not respond in JSON or text format.
+  - Execute the tool directly.
 
-  # Available Tools Information
+  # Notes
+  - If the tool name is explicitly written in the above instructions, call that tool.
+  - No questions or messages are needed.
+  - If the tool to call is unclear, select it based on the 'Information on available tools' below.
+  - First, determine whether a search is required or if another task is needed.
+  - If uncertain, call ans_llm_base.
+  - Do not use the 'search tool' for purposes other than search.
+
+  # Information on available tools
   {tool_info}
 
 # --- Used at router_agent.py ---
