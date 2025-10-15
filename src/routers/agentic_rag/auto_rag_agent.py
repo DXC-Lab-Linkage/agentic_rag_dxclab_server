@@ -91,33 +91,60 @@ class AutoRagAgent:
         """
         Extract tool name from content
         """
-        try:
-            if hasattr(response, "tool_calls") and response.tool_calls:
-                return msg_util.get_tool_names(response)
 
-            content = response.content
-            if not content:
+        norm = lambda s: (
+            s.split(".")[-1].strip() if isinstance(s, str) and s.strip() else None
+        )
+
+        def from_tool_calls(tc):
+            if not tc:
                 return None
+            x = tc[0]
+            if isinstance(x, dict):
+                name = (x.get("function", {}) or {}).get("name") or x.get("name")
+            else:
+                name = getattr(getattr(x, "function", None), "name", None) or getattr(
+                    x, "name", None
+                )
+            n = norm(name)
+            return [n] if n else None
 
-            # Parse as JSON.
-            data = json.loads(content)
+        # 1) LangChain/OpenAI: response.tool_calls
+        n = from_tool_calls(getattr(response, "tool_calls", None))
+        if n:
+            return n
 
-            # Extract recipient_name from tool_uses
-            if "tool_uses" in data and data["tool_uses"]:
-                tool_use = data["tool_uses"][0]
-                recipient_name = tool_use.get("recipient_name", "")
+        # 2) additional_kwargs: tool_calls / function_call
+        ak = getattr(response, "additional_kwargs", {}) or {}
+        n = from_tool_calls(ak.get("tool_calls"))
+        if n:
+            return n
+        n1 = norm(
+            (ak.get("function_call") or {}).get("name")
+            if isinstance(ak.get("function_call"), dict)
+            else None
+        )
+        if n1:
+            return [n1]
 
-                # Extract tool name from functions.[tool_name]
-                if "." in recipient_name:
-                    tool_name = recipient_name.split(".")[-1]
-                else:
-                    tool_name = recipient_name
-
-                return [tool_name] if tool_name else None
-
-        except (json.JSONDecodeError, KeyError, AttributeError) as e:
-            print(f"Error extracting tool name: {e}")
-            return None
+        # 3) content(JSON)
+        content = getattr(response, "content", None)
+        if isinstance(content, str) and content.strip():
+            try:
+                d = json.loads(content)
+                if isinstance(d, dict):
+                    n1 = norm((d.get("function_call") or {}).get("name"))
+                    if n1:
+                        return [n1]
+                    n = from_tool_calls(d.get("tool_calls"))
+                    if n:
+                        return n
+                    rn = ((d.get("tool_uses") or [{}])[0] or {}).get("recipient_name")
+                    n2 = norm(rn)
+                    if n2:
+                        return [n2]
+            except (json.JSONDecodeError, TypeError):
+                pass
 
         return None
 
