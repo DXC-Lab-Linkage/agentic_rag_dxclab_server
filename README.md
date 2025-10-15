@@ -70,7 +70,7 @@ Set up the backend environment as follows.
 ### Products Used
 
 - Confirmed to work with Python versions 3.11 and 3.12.
-- Uses Azure Open AI `gpt-4o` or `gpt-4o-mini`.
+- Uses Azure Open AI `gpt-4o`, `gpt-4o-mini` or `gpt-5-chat`.
 - Uses Tavily Search web search.
 - Uses LangSmith. Not required.
 

@@ -72,7 +72,7 @@
 ### 使用プロダクト
 
 - Python version 3.11、3.12 で動作確認済みです。
-- Azure Open AI の `gpt-4o` または `gpt-4o-mini` を使用します。
+- Azure Open AI の `gpt-4o`, `gpt-4o-mini` または `gpt-5-chat` を使用します。
 - Tavily search の Web 検索を使用します。
 - LangSmith を使用します。必須ではありません。
 
