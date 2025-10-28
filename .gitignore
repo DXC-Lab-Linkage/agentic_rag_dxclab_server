@@ -19,3 +19,6 @@ dist/*
 # dist/assetsフォルダー内の全てのファイルを無視。ただし、dist/assets/.gitkeepは無視しない
 dist/assets/*
 !dist/assets/.gitkeep
+
+# cline
+.clinerules
