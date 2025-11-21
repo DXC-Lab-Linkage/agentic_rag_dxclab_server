@@ -15,6 +15,7 @@
   - [How to Modify Vector DB Data](#how-to-modify-vector-db-data)
     - [Registering Data to the Vector DB: create\_index.py](#registering-data-to-the-vector-db-create_indexpy)
       - [Modify the Description of Information Registered in the Vector DB](#modify-the-description-of-information-registered-in-the-vector-db)
+  - [Batch Mode Documentation](#batch-mode-documentation)
 
 ## Overview
 
@@ -232,3 +233,7 @@ Describes the purpose of this tool. Must be written in English.
           str: answer
         """
 ```
+
+## Batch Mode Documentation
+
+For information on how to use the batch mode feature, please see the [Batch Mode Documentation](/README_batch.md).

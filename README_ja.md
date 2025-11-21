@@ -15,6 +15,7 @@
   - [Vector DB データの変更方法](#vector-db-データの変更方法)
     - [Vector DB へのデータの登録：create\_index.py](#vector-db-へのデータの登録create_indexpy)
       - [Vector DB に登録した情報の説明を変更](#vector-db-に登録した情報の説明を変更)
+  - [バッチモードのドキュメント](#バッチモードのドキュメント)
 
 ## 概要
 
@@ -227,3 +228,7 @@ The following tools are capable of searching only. Please do not call them for a
           str: answer
         """
 ```
+
+## バッチモードのドキュメント
+
+バッチモード機能の使用方法については、[バッチモードのドキュメント](/README_batch_ja.md)を参照してください。
