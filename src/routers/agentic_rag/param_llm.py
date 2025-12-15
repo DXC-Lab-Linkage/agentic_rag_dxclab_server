@@ -23,12 +23,14 @@ def get_gpt_model():
         WATSONX_BASE_URL = os.getenv("WATSONX_BASE_URL")
         WATSONX_PROJECT_ID = os.getenv("WATSONX_PROJECT_ID")
 
-        # LLMのパラメーター
+        # LLM parameter
         model = ChatWatsonx(
             model_id=WATSONX_MODEL_ID,
             url=WATSONX_BASE_URL,
             apikey=WATSONX_API_KEY,
             project_id=WATSONX_PROJECT_ID,
+            temperature=0,
+            max_tokens=0,  # If you don’t specify max_tokens, the response will be cut off in the middle. A value of 0 indicates the model’s configured maximum number of generated tokens.(https://cloud.ibm.com/apidocs/watsonx-ai#text-chat-stream)
         )
     else:
         # Get the deployment name set in the environment variable
