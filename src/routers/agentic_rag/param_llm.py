@@ -24,22 +24,11 @@ def get_gpt_model():
         WATSONX_PROJECT_ID = os.getenv("WATSONX_PROJECT_ID")
 
         # LLMのパラメーター
-        llm_params = {
-            "frequency_penalty": 0,
-            "presence_penalty": 0,
-            "temperature": 0,
-            "top_p": 1.0,
-        }
-
         model = ChatWatsonx(
             model_id=WATSONX_MODEL_ID,
             url=WATSONX_BASE_URL,
             apikey=WATSONX_API_KEY,
             project_id=WATSONX_PROJECT_ID,
-            params=llm_params,
-            model_kwargs={
-                "max_completion_tokens": 131072,
-            },
         )
     else:
         # Get the deployment name set in the environment variable
