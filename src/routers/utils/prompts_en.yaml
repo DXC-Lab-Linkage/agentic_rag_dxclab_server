@@ -25,6 +25,7 @@ select_tool: |
 route_request: |
   # Instructions
   - Determine which AI Agent to invoke based on the user's question or request.
+  - Respond in the same language as the user's question. 
   - If the user's question contains pronouns such as "this," "these," "that," etc., clearly replace each pronoun with the full expression it refers to, and write the clarified version in `revised_request`. If no changes are required, copy the user's original question directly into `revised_request`. Consider the intent of the user's question or request when creating the `revised_request`. Ensure that no pronouns remain, as unresolved pronouns may cause incorrect processing in subsequent steps.
   - Also, reference the conversation history to understand the context. Even if there are no pronouns, the user might be asking based on the context of the previous conversation. For instance, if an AI Agent previously clarified unclear points with the user, and the user has responded, summarize the entire context clearly and incorporate it into the `revised_request`.
   - Even if the user's question contains no pronouns, the user might expect an answer that considers the context of previous conversations. In such cases, infer the intended meaning by examining the conversation history.
@@ -65,6 +66,7 @@ ans_llm_solo: |
   # Instructions  
   Please respond to the user's question or request. When doing so, take into account the conversation history as well.  
   If there is not enough information to investigate, please ask the user for more details.  
+  Respond in the same language as the user's question.
 
   # Question  
   {rev_request}  
@@ -80,6 +82,7 @@ ans_llm_solo: |
 ask_human: |
   # Instructions
   Please ask the user the following "Question to User," taking into account the provided "Conversation History." You attempted to answer the user's latest question but require additional information from the user due to insufficient context.
+  Respond in the same language as the user's question.
 
   # Question to User
   {rev_request}
@@ -93,6 +96,7 @@ ans_llm_base: |
   # Instructions
   Answer the user's question or request. If a research history is available, please refer to it.  
   Keep the answer concise.
+  Respond in the same language as the user's question.
 
   # Question
   {question}
@@ -166,6 +170,7 @@ create_plan: |
   - `plan`: Specify the task plans (can be multiple) in an array format. Ensure it matches the number of elements in `plan_status`.
   - `plan_status`: Specify the execution status for each plan (can be multiple) in an array format. Since you are currently planning, set all values to `"open"`. Ensure it matches the number of elements in `plan`.
   - Output must be in JSON format. Be careful not to output plain text. Special characters such as double quotes (`"`) and backslashes (`\`) within strings must be properly escaped according to JSON rules.
+  -  Plan should be in the same language as the user request.
 
   Example Output: {{"type": "plan", "plan":["plan1", "plan2"...], "plan_status": ["open", "open"...]}}
 
@@ -178,6 +183,7 @@ create_plan: |
 create_final_answer: |
   # Instructions
   You are an expert at summarizing documents. Based on the provided research results, clearly summarize the answer to the user's question.  
+  Respond in the same language as the user request.
   Refer to the conversation history as well. Particularly, if you have been asked to verify previously researched results, compare earlier answers from this conversation with the provided "Research Results" for verification.  
   If URLs to source documents are included in the research results, incorporate them into your response.  
   The research results contain information gathered from multiple resources. Be mindful of document boundaries to avoid mixing information from different sources.
@@ -224,7 +230,7 @@ judge_replan: |
 
 create_revised_plan: |
   # Instructions
-  You are an expert in creating task plans for research.  
+  You are an expert in creating task plans for research. 
   Perform the following two steps:
 
   ## Step 1
@@ -259,6 +265,7 @@ create_revised_plan: |
   - `plan`: Specify task plans (multiple allowed) in an array format. Ensure it matches the number of elements in `plan_status`.
   - `plan_status`: Specify execution status for each plan (multiple allowed) in an array format. At the planning stage, set all values to `"open"`. Ensure it matches the number of elements in `plan`.
   - Output must be in JSON format. Carefully avoid outputting plain text. Special characters such as double quotes (`"`) and backslashes (`\`) within strings must be properly escaped according to JSON rules.
+  -  Plan should be in the same language as the user request.
 
   # Example Output: {{"type": "plan", "plan":["plan1", "plan2"...], "plan_status": ["open", "open"...]}}
 

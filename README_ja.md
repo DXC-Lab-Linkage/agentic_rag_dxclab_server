@@ -13,7 +13,7 @@
   - [RAG 用 Vector DB について](#rag-用-vector-db-について)
   - [アプリケーションの起動](#アプリケーションの起動)
   - [Vector DB データの変更方法](#vector-db-データの変更方法)
-    - [Vector DB へのデータの登録：create\_index.py](#vector-db-へのデータの登録create_indexpy)
+    - [Vector DB へのデータの登録：create_index.py](#vector-db-へのデータの登録create_indexpy)
       - [Vector DB に登録した情報の説明を変更](#vector-db-に登録した情報の説明を変更)
   - [バッチモードのドキュメント](#バッチモードのドキュメント)
 
@@ -54,7 +54,6 @@
 1. ユーザーに質問 (依頼内容に不明点がある場合) [ask_human]
 2. LLM 自身が回答 [ans_llm_solo]
 3. 検索
-
    - 計画作成 (複数可) [create_plan]
    - 計画を基にツールを呼び出す（ツール：Tavily search Web 検索、RAG、Arxiv 論文検索、LLM 自身の回答）[select_tool]
    - 回答が得られなければ計画を再作成 [create_revised_plan]
@@ -126,7 +125,7 @@ FRONT_MSG_LANG=JA
 # Language of rag index data(EN: English, JA: Japanese)
 RAG_INDEX_LANG=JA
 # Parameters to control agent
-MAX_PLAN=7
+MAX_PLAN=5
 MAX_TURN=2
 MAX_SEARCH_TXT=10000
 

@@ -13,7 +13,7 @@
   - [About the Vector DB for RAG](#about-the-vector-db-for-rag)
   - [Starting the Application](#starting-the-application)
   - [How to Modify Vector DB Data](#how-to-modify-vector-db-data)
-    - [Registering Data to the Vector DB: create\_index.py](#registering-data-to-the-vector-db-create_indexpy)
+    - [Registering Data to the Vector DB: create_index.py](#registering-data-to-the-vector-db-create_indexpy)
       - [Modify the Description of Information Registered in the Vector DB](#modify-the-description-of-information-registered-in-the-vector-db)
   - [Batch Mode Documentation](#batch-mode-documentation)
 
@@ -52,7 +52,6 @@ Below is the graph of the Agent created using LangGraph. Based on the user’s q
 1. AI Agent ask the user a question. (if there are unclear points in the request) [ask_human]
 2. AI Agent answers directly as a LLM. [ans_llm_solo]
 3. AI Agent searches.
-
    - Create one or more plans [create_plan]
    - Invoke tools based on the plan (tools: Tavily search web search, RAG, Arxiv paper search, LLM’s own response) [select_tool]
    - If no answer is obtained, recreate the plan [create_revised_plan]
@@ -124,7 +123,7 @@ FRONT_MSG_LANG=EN
 # Language of rag index data(EN: English, JA: Japanese)
 RAG_INDEX_LANG=EN
 # Parameters to control agent
-MAX_PLAN=7
+MAX_PLAN=5
 MAX_TURN=2
 MAX_SEARCH_TXT=10000
 
