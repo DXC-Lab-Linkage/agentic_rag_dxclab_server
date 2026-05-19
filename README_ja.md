@@ -203,6 +203,7 @@ The following tools are capable of searching only. Please do not call them for a
 ## Tools for LLM-Generated Responses
 - **ans_llm_base**: Provides answers based on the LLM's own knowledge. It is capable of answering questions, summarizing, taking action on research findings, analyzing, extracting keywords, computing, offering opinions and insights, reasoning, and listing results.
 ...
+
 ```
 
 > `def search_rag` 関数の Docstring
