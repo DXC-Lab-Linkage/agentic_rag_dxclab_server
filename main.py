@@ -20,6 +20,7 @@ from src.routers.get_chat_id import router as chat_id
 from src.routers.get_csrf import router as get_csrf
 from src.routers.get_param import router as get_param
 from src.routers.start_chat import router as start_chat
+from src.routers.utils.constants import MIN_SESSION_SECRET_KEY_LENGTH
 
 load_dotenv()
 
@@ -54,13 +55,27 @@ async def lifespan(app: FastAPI):
     yield
 
 
+def get_session_secret_key() -> str:
+    """
+    Get the secret key for signing the session cookie.
+
+    If the key is not set, Starlette signs with "None", so anyone can forge the session.
+    Stop the app if the key is missing, still the template value, or too short.
+    """
+    key = os.getenv("SESSION_SECRET_KEY", "")
+    if len(key) < MIN_SESSION_SECRET_KEY_LENGTH or "*" in key:
+        raise RuntimeError(
+            f"SESSION_SECRET_KEY must be a random string of at least {MIN_SESSION_SECRET_KEY_LENGTH} characters. "
+            'Generate one with: python -c "import secrets; print(secrets.token_urlsafe(32))"'
+        )
+    return key
+
+
 # Since for production use, the settings will not display specifications, etc.
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
 app.add_middleware(
     SessionMiddleware,
-    secret_key=os.getenv(
-        "SESSION_SECRET_KEY",
-    ),
+    secret_key=get_session_secret_key(),
     same_site="Strict",
     https_only=True,
 )

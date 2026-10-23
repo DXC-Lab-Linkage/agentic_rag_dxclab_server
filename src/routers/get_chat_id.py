@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, Request
 
 from ..schemas.app_schemas import ChatId
+from .utils.constants import MAX_SESSION_CHAT_IDS
 from .utils.csrf_utils import check_csrf
 
 load_dotenv()
@@ -34,8 +35,13 @@ def get_parameters(req: Request):
     except Exception as err:
         print(f"{PY_FILE_NAME}{err}")
         raise err
-    chat_id = uuid4()
+    chat_id = str(uuid4())
+    # Store the issued chat_id in the session so that ask_agent can verify it.
+    # Keep a list to support multiple tabs and reloads.
+    chat_ids = req.session.get("chat_ids", [])
+    chat_ids.append(chat_id)
+    req.session["chat_ids"] = chat_ids[-MAX_SESSION_CHAT_IDS:]
     ret = ChatId(
-        chat_id=str(chat_id),
+        chat_id=chat_id,
     )
     return ret

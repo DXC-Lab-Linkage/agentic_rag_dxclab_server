@@ -102,7 +102,7 @@ pip install -r requirements.txt
 
 `env.template` ファイルをコピーして、`.env` という名前に変更します。環境に合わせて設定を行います。
 
-- `SESSION_SECRET_KEY` にはランダムな文字列を設定してください。鍵として使用するため、大小の英字と数字を含めた約 16 桁の文字列が望ましいです。それぞれ異なる値を設定してください。
+- `SESSION_SECRET_KEY` には 32 文字以上のランダムな文字列を設定してください。未設定、短すぎる、`***` のままの場合はアプリが起動しません。`python -c "import secrets; print(secrets.token_urlsafe(32))"` で生成できます。それぞれ異なる値を設定してください。
 - `PROMPT_LANG`、`AGENT_THOUGHT_LANG`、`FRONT_MSG_LANG`、`RAG_INDEX_LANG` を設定することで、英語または日本語の表示を切り替えることが可能です。**日本語で使用する場合は、`JA` の値をセットしてください。**
 - `MAX_PLAN` によって、Agent が作成する Plan 数の最大値を設定できます。
 - Agent が最初のターンで回答を見つけられなかった場合、次のターンとして再度 Plan を立て直します。その最大ターン数は `MAX_TURN` で設定できます。

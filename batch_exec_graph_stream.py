@@ -166,19 +166,16 @@ async def exec_graph_stream_with_history(
     except Exception as err:
         import traceback
 
-        full_traceback = traceback.format_exc()
-        print("=" * 80)
-        print("FULL ERROR TRACEBACK:")
-        print(full_traceback)
-        print("=" * 80)
-        print(f"Error type: {type(err).__name__}")
-        print(f"Error message: {err}")
-
+        # Details (error message, traceback) are written only to the log.
+        error_id = uuid.uuid4().hex[:12]
+        logger.error(
+            f"Agent error. error_id={error_id} "
+            f"type={type(err).__name__} message={err}\n{traceback.format_exc()}"
+        )
         data = {
             "type": "error",
             "content": "Error: An error occurred while running the Agent.",
-            "detail": str(err),
-            "traceback": full_traceback,
+            "error_id": error_id,
         }
         yield f"{json.dumps(data)}\n\n"
         raise Exception(err)
@@ -240,8 +237,8 @@ class BatchGraphStreamExecutor:
                         elif msg_type == "error":
                             error_info = {
                                 "message": content,
-                                "detail": data.get("detail", ""),
-                                "traceback": data.get("traceback", ""),
+                                "detail": f"error_id={data.get('error_id', '')} (see the log file for details)",
+                                "traceback": "",
                             }
                             break
 

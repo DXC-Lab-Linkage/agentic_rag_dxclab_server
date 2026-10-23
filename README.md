@@ -100,7 +100,7 @@ pip install -r requirements.txt
 
 Copy the `env.template` file and rename it to `.env`. Configure the settings according to your environment.
 
-- Set `SESSION_SECRET_KEY` to a random string. Since it is used as a key, it is desirable to include both uppercase and lowercase letters and numbers, with approximately 16 characters. Use different values for each key.
+- Set `SESSION_SECRET_KEY` to a random string of at least 32 characters. The app does not start if it is not set, is too short, or is left as `***`. Generate one with `python -c "import secrets; print(secrets.token_urlsafe(32))"`. Use different values for each key.
 - By setting `PROMPT_LANG`, `AGENT_THOUGHT_LANG`, `RAG_INDEX_LANG` and `FRONT_MSG_LANG`, you can switch the display between English and Japanese.
 - Use `MAX_PLAN` to set the maximum number of Plans the Agent can create.
 - If the Agent fails to find an answer on the first turn, it will re-plan for the next turn. The maximum number of turns can be configured with `MAX_TURN`.

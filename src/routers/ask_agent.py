@@ -5,6 +5,7 @@ import logging
 import os
 import time
 import traceback
+from uuid import uuid4
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Request
@@ -14,12 +15,24 @@ from langchain_core.messages import HumanMessage
 from src.routers.agentic_rag.message_utils import MsgUtils
 from src.schemas.app_schemas import ChatModel
 
-from .utils.constants import REST_API_500_ERROR
+from .utils.constants import (
+    ASK_AGENT_RATE_LIMIT,
+    ASK_AGENT_RATE_WINDOW_SEC,
+    CHAT_THREAD_TTL_SEC,
+    MAX_CHAT_THREADS,
+    REST_API_403_ERROR,
+    REST_API_429_ERROR,
+    REST_API_500_ERROR,
+)
 from .utils.csrf_utils import check_csrf
 from .utils.log_dev import LogDev
+from .utils.rate_limit import RateLimiter
+from .utils.thread_registry import ThreadRegistry
 
 load_dotenv()
 log = LogDev()
+rate_limiter = RateLimiter(ASK_AGENT_RATE_LIMIT, ASK_AGENT_RATE_WINDOW_SEC)
+thread_registry = ThreadRegistry(MAX_CHAT_THREADS, CHAT_THREAD_TTL_SEC)
 
 msg_util = MsgUtils()
 PY_FILE_NAME = "[src/routers/ask_agent.py]: "
@@ -131,19 +144,17 @@ async def exec_graph_stream(request: ChatModel, req: Request):
         data = {"type": "final_msg", "content": sanitized_answer}
         yield f"{json.dumps(data)}\n\n"
     except Exception as err:
-        full_traceback = traceback.format_exc()
-        print("=" * 80)
-        print("FULL ERROR TRACEBACK:")
-        print(full_traceback)
-        print("=" * 80)
-        print(f"Error type: {type(err).__name__}")
-        print(f"Error message: {err}")
-
+        # Details (error message, traceback) are written only to the server log.
+        # The client gets a fixed message and an ID to find the log entry.
+        error_id = uuid4().hex[:12]
+        logging.error(
+            f"{PY_FILE_NAME}Agent error. error_id={error_id} "
+            f"type={type(err).__name__} message={err}\n{traceback.format_exc()}"
+        )
         data = {
             "type": "error",
             "content": "Error: An error occurred while running the Agent.",
-            "detail": str(err),
-            "traceback": full_traceback,
+            "error_id": error_id,
         }
         yield f"{json.dumps(data)}\n\n"
         raise Exception(err)
@@ -156,6 +167,23 @@ async def exec_graph_stream(request: ChatModel, req: Request):
     yield f"{json.dumps(data)}\n\n"
 
 
+async def release_old_threads(chat_id: str, req: Request):
+    """
+    Record that the chat_id is used, and delete the conversation history of old chats.
+
+    The history is kept in memory (MemorySaver), so it is limited by the number of chats and by the time since last use.
+
+    Args:
+      chat_id (str): chat_id of the current request.
+      req (Request): The current request object.
+    """
+    for old_id in thread_registry.touch(chat_id):
+        try:
+            await req.app.state.graph_app.checkpointer.adelete_thread(old_id)
+        except Exception as err:
+            logging.error(f"Error: [/api/ask_agent] failed to delete old thread: {err}")
+
+
 @router.post("/api/ask_agent")
 async def ask_agent(request: ChatModel, req: Request):
     try:
@@ -163,6 +191,16 @@ async def ask_agent(request: ChatModel, req: Request):
     except Exception as err:
         print(f"{PY_FILE_NAME}{err}")
         raise err
+    # Reject chat_ids that were not issued to this session by get_chat_id.
+    if request.chat_id not in req.session.get("chat_ids", []):
+        logging.error("Error: [/api/ask_agent] chat_id not issued to this session.")
+        raise HTTPException(status_code=403, detail=REST_API_403_ERROR)
+    # Limit how often one client can start the agent (each call runs many LLM/search calls).
+    client_key = req.client.host if req.client else "unknown"
+    if not rate_limiter.allow(client_key):
+        logging.error(f"Error: [/api/ask_agent] rate limit exceeded. client={client_key}")
+        raise HTTPException(status_code=429, detail=REST_API_429_ERROR)
+    await release_old_threads(request.chat_id, req)
     try:
         # No "await" because of an asynchronous generator.
         generator = exec_graph_stream(request, req)
